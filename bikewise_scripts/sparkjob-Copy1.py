@@ -67,7 +67,7 @@ def insert_into_table(spark, hdfs_username, df, table_name):
         
         
 def df_to_json(today, hdfs_username, df, table_name):
-    df.write.format('json').save(f'/user/{hdfs_username}/bikewise/{table_name}/{today}')        
+    df.write.mode('overwrite').format('json').save(f'/user/{hdfs_username}/bikewise/{table_name}/{today}')        
     
         
 def create_report(today, df):

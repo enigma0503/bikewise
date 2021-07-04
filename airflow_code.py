@@ -4,19 +4,11 @@ import json
 import requests
 import os
 import getpass
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-from pyspark.sql.functions import *
-from pyspark.sql import SparkSession, catalog
-
 from airflow.models import DAG
-from airflow.models import Variable
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 
-# spark = None
 username = getpass.getuser()
 
 #get the timestamps to fectch the data from the API
@@ -24,12 +16,13 @@ username = getpass.getuser()
 def get_timestamp(**kwargs):
     current_ts = int(time.time())
     today = datetime.date.today()
+    yesterday = today - datetime.timedelta(days=1)
     today = today.strftime("%Y-%m-%d")
+    yesterday = yesterday.strftime("%Y-%m-%d")
     to_time = datetime.datetime.strptime(today,"%Y-%m-%d")  
     today_ts = int(datetime.datetime.timestamp(to_time)) - 14400
-    kwargs['ti'].xcom_push(key='timestamps', value = [today_ts, current_ts, today])
-    
-    
+    yesterday_ts = today_ts - 86400
+    kwargs['ti'].xcom_push(key='timestamps', value = [yesterday_ts ,today_ts, yesterday])
     
 # just to log the results
     
@@ -59,14 +52,13 @@ def get_response(**kwargs):
                    "occurred_before": timestamps[0][1],
                    "occurred_after": timestamps[0][0]
               }
-    try:
-        response = requests.get(url, headers=header, params = parameters)
-        data = response.json()
-        data = data["incidents"]
-        kwargs['ti'].xcom_push(key='data', value = data)
-        print('response_data_bikewise', data)
-    except Exception as e:
-        print(e)
+    response = requests.get(url, headers=header, params = parameters)
+    data = response.json()
+    data = data["incidents"]
+    print("this is to fail the node", data[0]['id'])
+    kwargs['ti'].xcom_push(key='data', value = data)
+        
+    print('response_data_bikewise', data)
 
         
         
@@ -124,7 +116,7 @@ print_ts = PythonOperator(
 
 create_bike_data_dir = BashOperator(
     task_id = 'create_bike_data_dir',
-    bash_command = " mkdir -p ~/shubham/bike_data/`date '+%Y-%m-%d'` ",
+    bash_command = 'mkdir -p ~/shubham/bike_data/`date -d "1 days ago" +"%Y-%m-%d"`',
     dag = dag
 )
 
@@ -146,28 +138,31 @@ create_hdfs_final_dir = BashOperator(
     dag = dag
 )
 
+create_hdfs_reports_dir = BashOperator(
+    task_id = 'create_hdfs_reports_dir',
+    bash_command = 'hdfs dfs -mkdir -p /user/${USER}/bikewise/final/reports',
+    dag = dag
+)
+
 
 copy_json_file_to_hdfs = BashOperator(
     task_id = 'copy_json_file_to_hdfs',
-    bash_command = "hdfs dfs -copyFromLocal /home/itv000579/shubham/bike_data/`date '+%Y-%m-%d'` /user/${USER}/bikewise/raw",
+    bash_command = 'hdfs dfs -copyFromLocal -f /home/itv000579/shubham/bike_data/`date -d "1 days ago" +"%Y-%m-%d"` /user/${USER}/bikewise/raw',
     dag = dag
 )
 
 spark_job = BashOperator(
     task_id = 'spark_job',
-    bash_command = '/home/itv000579/airflow/airflow-env/bin/python /home/itv000579/airflow/dags/sparkjob.py',
+    bash_command = '/home/itv000579/airflow/airflow-env/bin/python /home/itv000579/airflow/bikewise_scripts/sparkjob.py',
     dag = dag
 )
 
 # relations below
 
-
-create_hdfs_raw_dir >> copy_json_file_to_hdfs
-create_hdfs_init_dir
-create_hdfs_final_dir
-# create_hdfs_checking_dir
-
-create_bike_data_dir >> get_timestamp >>  get_response  >> print_ts >> create_file >> copy_json_file_to_hdfs
+create_bike_data_dir >> get_timestamp >>  get_response  >> print_ts >> create_file >> copy_json_file_to_hdfs >> spark_job
+get_response >> create_hdfs_raw_dir >> copy_json_file_to_hdfs 
+get_response >> create_hdfs_init_dir >> spark_job
+get_response >> create_hdfs_final_dir >> create_hdfs_reports_dir >> spark_job
 copy_json_file_to_hdfs >> spark_job
 
 if __name__ == "__main__":

@@ -153,16 +153,22 @@ copy_json_file_to_hdfs = BashOperator(
 
 spark_job = BashOperator(
     task_id = 'spark_job',
-    bash_command = '/home/itv000579/airflow/airflow-env/bin/python /home/itv000579/airflow/bikewise_scripts/sparkjob.py',
+    bash_command = '/home/itv000579/airflow/airflow-env/bin/python /home/itv000579/airflow/bikewise_scripts/sparkjob.py && sleep 60',
+    dag = dag
+)
+
+copy_report = BashOperator(
+    task_id = 'copy_report',
+    bash_command = 'hdfs dfs -copyFromLocal -f /home/itv000579/shubham/bike_data/reports/report_`date -d "1 days ago" +"%Y-%m-%d"`.pdf /user/${USER}/bikewise/final/reports',
     dag = dag
 )
 
 # relations below
 
 create_bike_data_dir >> get_timestamp >>  get_response  >> print_ts >> create_file >> copy_json_file_to_hdfs >> spark_job
-get_response >> create_hdfs_raw_dir >> copy_json_file_to_hdfs 
+get_response >> create_hdfs_raw_dir >> copy_json_file_to_hdfs
 get_response >> create_hdfs_init_dir >> spark_job
-get_response >> create_hdfs_final_dir >> create_hdfs_reports_dir >> spark_job
+get_response >> create_hdfs_final_dir >> create_hdfs_reports_dir >> spark_job >> copy_report
 copy_json_file_to_hdfs >> spark_job
 
 if __name__ == "__main__":

@@ -144,6 +144,11 @@ create_hdfs_reports_dir = BashOperator(
     dag = dag
 )
 
+sleep = BashOperator(
+    task_id = 'sleep',
+    bash_command = 'sleep 20',
+    dag = dag
+)
 
 copy_json_file_to_hdfs = BashOperator(
     task_id = 'copy_json_file_to_hdfs',
@@ -165,7 +170,7 @@ copy_report = BashOperator(
 
 # relations below
 
-create_bike_data_dir >> get_timestamp >>  get_response  >> print_ts >> create_file >> copy_json_file_to_hdfs >> spark_job
+create_bike_data_dir >> get_timestamp >> get_response >> print_ts >> create_file >> sleep >> copy_json_file_to_hdfs >> spark_job
 get_response >> create_hdfs_raw_dir >> copy_json_file_to_hdfs
 get_response >> create_hdfs_init_dir >> spark_job
 get_response >> create_hdfs_final_dir >> create_hdfs_reports_dir >> spark_job >> copy_report

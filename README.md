@@ -48,19 +48,19 @@
 * Now we need to create 2 environment variables. Use the terminal to open your `.bashrc` file and make the required changes as shown below
 
   * To open the file use the following command
-```shell
- vi ~/.bashrc
-```
+  ```shell
+  vi ~/.bashrc
+  ```
   * Move to the end of the file and type the following (make sure to make the changes as per your server):
 
-```shell
- export ENVIRON=PROD
- export CONFIG_LOC=/path/to/your/config.yaml
-```
+  ```shell
+  export ENVIRON=PROD
+  export CONFIG_LOC=/path/to/your/config.yaml
+  ```
   * Save and exit the editor. In order to make sure that the changes are reflected, we need to rerun the `.bashrc` file. To do so run the following command
 
-```shell
- . ~/.bashrc
-```
+  ```shell
+  . ~/.bashrc
+  ```
 
 * Now you can test your DAG using the Airflow webserver UI.

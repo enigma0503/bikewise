@@ -47,10 +47,11 @@
 ```
 * Now we need to create 2 environment variables. Use the terminal to open your `.bashrc` file and make the required changes as shown below
 
+  * To open the file use the following command
 ```shell
  vi ~/.bashrc
 ```
-  * Move to the bottom of the file and type the following (make sure to make the changes as per your server):
+  * Move to the end of the file and type the following (make sure to make the changes as per your server):
 
 ```shell
  export ENVIRON=PROD

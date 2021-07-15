@@ -1,7 +1,15 @@
 from pyspark.sql.functions import *
 from pyspark.sql import SparkSession, catalog
+from bookmark import update_bookmark
 
-def insert_into_table(spark, hdfs_username, df, table_name):
+
+
+def df_to_json(yesterday, hdfs_username, df, table_name):
+    df.write.mode('overwrite').format('json').save(f'/user/{hdfs_username}/bikewise/{table_name}/{yesterday}')        
+
+
+    
+def insert_into_table(spark, hdfs_username, df, table_name, timestamps):
     tables = spark.catalog.listTables(f'{hdfs_username}_bikewise_{table_name}')
     found = False
     for table in tables:
@@ -22,4 +30,8 @@ def insert_into_table(spark, hdfs_username, df, table_name):
         write. \
         partitionBy('year', 'month', 'day'). \
         saveAsTable(f'{hdfs_username}_bikewise_{table_name}.incidents_{table_name}')
+    
+    if(table_name=='final'):
+        update_bookmark(timestamps[2], 5)
+        
         

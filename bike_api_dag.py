@@ -5,7 +5,7 @@ from airflow.utils.dates import days_ago
 from airflow.models import Variable
 
 
-sshHook = SSHHook(ssh_conn_id='ITV_000579')
+sshHook = SSHHook(ssh_conn_id='SSH_CONNECTION')
 
 default_args = {
     'owner': 'enigma0503',

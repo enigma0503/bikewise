@@ -1,0 +1,7 @@
+PROD:
+  URL: https://bikewise.org:443/api/v2/incidents
+  BOOKMARK_FILE: /home/itv000579/bookmark.json
+  LOCAL_DATA_DIR: /home/itv000579/shubham/bike_data
+  LOCAL_REPORTS_DIR: /home/itv000579/shubham/bike_data/reports
+  HDFS_DIR: /user
+  HDFS_USERNAME: itv000579

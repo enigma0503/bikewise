@@ -19,6 +19,9 @@ def get_response(bookmark_file, local_data_dir, ts_list, url):
                           }
 
             response = requests.get(url, headers=header, params=parameters)
-            data = response.json()
-            data = data["incidents"]
-            create_file(bookmark_file, local_data_dir, data, timestamps)
+            if response.status_code == 200:
+                data = response.json()
+                data = data["incidents"]
+                create_file(bookmark_file, local_data_dir, data, timestamps)
+            else:
+                print(f"Error while fetching data. Response_code = {response.status_code}")

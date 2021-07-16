@@ -18,9 +18,10 @@ def insert_bookmark(bookmark_file, timestamps):
     key = timestamps[2]
     with open(bookmark_file, 'r+') as file:
         file_data = json.load(file)
-        file_data[key] = timestamps
-        file.seek(0)
-        json.dump(file_data, file, indent=4)
+        if key not in file_data.keys():
+            file_data[key] = timestamps
+            file.seek(0)
+            json.dump(file_data, file, indent=4)
 
 
 def update_bookmark(bookmark_file, key, pos):

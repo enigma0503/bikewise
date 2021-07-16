@@ -35,7 +35,7 @@ if __name__ == "__main__":
             yesterday = timestamps[2]
             file_path = f'/user/{hdfs_username}/bikewise/raw/{yesterday}/{yesterday}.json'
 
-            df = create.raw_df(spark, file_path)
+            df = create.raw_df(spark, file_path, yesterday)
 
             write_data.insert_into_table(bookmark_file, hdfs_dir, spark, hdfs_username, df, 'raw', timestamps)
 

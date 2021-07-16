@@ -19,16 +19,17 @@ def create_db(spark, username):
     spark.sql(f'create database if not exists {username}_bikewise_final')
 
 
-def raw_df(spark, file_path):
+def raw_df(spark, file_path, yesterday):
+    ys_lst = yesterday.split('-')
     df_raw = spark. \
         read. \
         json(file_path)
 
     df_raw = df_raw. \
-        withColumn('year', date_format(date_sub(current_date(), 1), 'yyyy')). \
-        withColumn('month', date_format(date_sub(current_date(), 1), 'MM')). \
-        withColumn('day', date_format(date_sub(current_date(), 1), 'dd'))
-    return (df_raw)
+        withColumn('year', lit(ys_lst[0])). \
+        withColumn('month', lit(ys_lst[1])). \
+        withColumn('day', lit(ys_lst[2]))
+    return df_raw
 
 
 def init_df(df):

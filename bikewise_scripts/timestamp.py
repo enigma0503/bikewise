@@ -11,4 +11,4 @@ def get_timestamp():
     to_time = datetime.datetime.strptime(today,"%Y-%m-%d")  
     today_ts = int(datetime.datetime.timestamp(to_time)) - 14400
     yesterday_ts = today_ts - 86400
-    return (yesterday_ts ,today_ts, yesterday,1,0,0)
+    return (yesterday_ts ,today_ts, yesterday,0,0,0)

@@ -8,7 +8,7 @@ sshHook = SSHHook(ssh_conn_id='SSH_CONNECTION')
 
 default_args = {
     'owner': 'enigma0503',
-    'start_date': days_ago(0)
+    'start_date': days_ago(1)
 }
 
 dag = DAG(
